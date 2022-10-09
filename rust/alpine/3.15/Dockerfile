@@ -6,11 +6,12 @@ RUN apk update
 RUN apk upgrade
 RUN apk add git build-base openssl-dev pkgconf perl ca-certificates curl
 
-# Env
-ENV CFLAGS=-mno-outline-atomics
-
 # Build Cargo Bins
-RUN cargo install cargo-edit cargo-generate wasm-pack trunk bacon just
+RUN ARCH=$(apk --print-arch); \
+    case $ARCH in \
+    aarch64) export CFLAGS='-mno-outline-atomics';; \
+    esac; \
+    cargo install cargo-edit cargo-generate wasm-pack trunk bacon just
 
 FROM alpine:3.15
 
@@ -23,7 +24,6 @@ RUN apk add git build-base openssl-dev pkgconf perl ca-certificates curl
 ENV RUSTUP_HOME=/usr/local/rustup
 ENV CARGO_HOME=/usr/local/cargo
 ENV PATH=/usr/local/cargo/bin:$PATH
-ENV CFLAGS=-mno-outline-atomics
 
 # Rust
 RUN ARCH=$(apk --print-arch); \
