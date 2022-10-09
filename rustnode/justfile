@@ -5,14 +5,15 @@ alias b := build-img
 
 arch_x64 := "amd64"
 arch_arm64 := "arm64"
-tag := "harmlesstech/rust:"
+tag := "harmlesstech/rustnode:"
+folder := "./../node"
 
 # Builds all images for all archs
 build: alpine debian ubuntu
 
 # Builds an image
-build-img FOLDER TAG ARCH:
-   docker build --pull --platform linux/{{ARCH}} -t {{TAG}} {{FOLDER}}
+build-img FOLDER TAG ARCH LTS="false":
+   docker build --no-cache --pull --platform linux/{{ARCH}} -t {{tag}}{{TAG}} {{FOLDER}} --build-arg SOURCE=harmlesstech/rust:{{TAG}} {{ if LTS == "true" { "--build-arg VERSION=lts" } else { "" } }}
 # --no-cache --progress plain
 
 ### Alpine
@@ -20,8 +21,8 @@ build-img FOLDER TAG ARCH:
 # Builds all alpine images
 alpine: alpine-latest alpine-3-15 alpine-3-14
 
-alpine_folder := "./alpine"
-alpine_tag := tag + "alpine-"
+alpine_folder := folder / "alpine"
+alpine_tag := "alpine-"
 
 # Builds latest alpine images
 alpine-latest: alpine-latest-x64 alpine-latest-arm64
@@ -65,8 +66,8 @@ alpine-3-14-arm64:
 # Builds all debian images
 debian: debian-latest debian-bullseye-slim debian-buster debian-buster-slim
 
-debian_folder := "./debian"
-debian_tag := tag + "debian-"
+debian_folder := folder / "debian"
+debian_tag := "debian-"
 
 # Builds latest debian images
 debian-latest: debian-latest-x64 debian-latest-arm64
@@ -126,8 +127,8 @@ debian-buster-slim-arm64:
 # Builds all ubuntu images
 ubuntu: ubuntu-latest ubuntu-focal
 
-ubuntu_folder := "./ubuntu"
-ubuntu_tag := tag + "ubuntu-"
+ubuntu_folder := folder / "ubuntu"
+ubuntu_tag := "ubuntu-"
 
 # Builds latest ubuntu images
 ubuntu-latest: ubuntu-latest-x64 ubuntu-latest-arm64
