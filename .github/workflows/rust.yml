@@ -45,7 +45,7 @@ jobs:
     steps:
       - name: Get Rust Version
         run: |
-          echo "rust_version=$(rustc -vV | grep "^release: " | cut -c 10-)" >> $GITHUB_ENV
+          echo "rust_version=$(rustc -vV | grep '^release: ' | cut -c 10-)" >> $GITHUB_ENV
       - name: Docker Setup QEMU
         uses: docker/setup-qemu-action@v2
       - name: Docker Setup Buildx
