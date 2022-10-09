@@ -1,5 +1,4 @@
 name: Build Rust Images
-description: Builds docker images for harmless/rust
 
 on:
   push:
@@ -19,7 +18,7 @@ defaults:
 env:
   img: 'harmless/rust:'
 
-runs:
+jobs:
   build:
     strategy:
       matrix:
