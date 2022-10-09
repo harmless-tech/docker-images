@@ -1,2 +1,2 @@
-# docker-rust
-Rust images for Docker with additional tools
+# docker-images
+A bunch of docker images.
