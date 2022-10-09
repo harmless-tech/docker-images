@@ -12,7 +12,7 @@ on:
 
 env:
   wrk_dir: './rust/'
-  img: 'harmless/rust:'
+  img: 'harmlesstech/rust:'
 
 jobs:
   build:
