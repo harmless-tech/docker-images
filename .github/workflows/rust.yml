@@ -8,7 +8,7 @@ on:
     branches: [ main ]
   workflow_dispatch:
   schedule:
-    - cron: '0 12 * * 6'
+    - cron: '0 4 * * 6'
 
 env:
   wrk_dir: './rust/'
@@ -41,6 +41,10 @@ jobs:
             context: ./ubuntu/focal
     runs-on: ubuntu-latest
     steps:
+      - name: Set Swap Space
+        uses: pierotofy/set-swap-space@v1.0
+        with:
+          swap-size-gb: 10
       - uses: actions/checkout@v3
       - name: Get Rust Version
         run: |
