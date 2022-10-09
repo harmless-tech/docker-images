@@ -1,4 +1,17 @@
 #TAG: alpine-3.15
+FROM rust:alpine as builder
+
+# Image updates
+RUN apk update
+RUN apk upgrade
+RUN apk add git build-base openssl-dev pkgconf perl ca-certificates curl
+
+# Env
+ENV CFLAGS=-mno-outline-atomics
+
+# Build Cargo Bins
+RUN cargo install cargo-edit cargo-generate wasm-pack trunk bacon just
+
 FROM alpine:3.15
 
 # Image updates
@@ -27,5 +40,6 @@ RUN ARCH=$(apk --print-arch); \
     rm -rf target
 RUN rustup toolchain install nightly
 RUN rustup target add wasm32-unknown-unknown
-RUN cargo install cargo-edit cargo-generate cargo-vcpkg cargo-cache wasm-pack trunk bacon just
-RUN cargo cache -e
+
+# Copy Cargo Bins
+COPY --from=builder /usr/local/cargo/bin /usr/local/cargo/bin

@@ -1,4 +1,16 @@
 #TAG: debian-latest
+FROM rust:latest as builder
+
+# Image updates
+RUN apt update
+RUN apt upgrade -y
+RUN DEBIAN_FRONTEND=noninteractive apt install -y --no-install-recommends tzdata
+RUN apt install -y pkg-config
+RUN apt install -y git curl build-essential libssl-dev
+
+# Build Cargo Bins
+RUN cargo install cargo-edit cargo-generate wasm-pack trunk bacon just
+
 FROM debian:latest
 
 # Image updates
@@ -28,5 +40,6 @@ RUN ARCH=$(dpkg --print-architecture); \
     rm -rf target
 RUN rustup toolchain install nightly
 RUN rustup target add wasm32-unknown-unknown
-RUN cargo install cargo-edit cargo-generate cargo-vcpkg cargo-cache wasm-pack trunk bacon just
-RUN cargo cache -e
+
+# Copy Cargo Bins
+COPY --from=builder /usr/local/cargo/bin /usr/local/cargo/bin

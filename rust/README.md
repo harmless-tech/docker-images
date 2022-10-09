@@ -8,9 +8,6 @@ Rust images with additional tools installed.
 <br>
 <br>
 *You can also append a rust version to the front of any tag. (EX: 1.64.0-debian-latest)*
-<br>
-*This*
-
 
 ## What's installed?
 - Rustup
@@ -18,11 +15,9 @@ Rust images with additional tools installed.
   - Latest nightly toolchain (Image is rebuilt about once a week)
   - Cargo, RustFmt, Clippy
 - Cargo Tools
-  - [cargo-edit]()
-  - [cargo-generate]()
-  - [cargo-vcpkg]()
-  - [cargo-cache]()
-  - [wasm-pack]()
-  - [trunk]()
-  - [bacon]()
-  - [just]()
+  - [cargo-edit](https://github.com/killercup/cargo-edit)
+  - [cargo-generate](https://github.com/cargo-generate/cargo-generate)
+  - [wasm-pack](https://github.com/rustwasm/wasm-pack)
+  - [trunk](https://github.com/thedodd/trunk)
+  - [bacon](https://github.com/Canop/bacon)
+  - [just](https://github.com/casey/just)

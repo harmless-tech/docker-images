@@ -8,7 +8,7 @@ arch_arm64 := "arm64"
 tag := "harmlesstech/rust:"
 
 # Builds all images for all archs
-build: alpine debian
+build: alpine debian ubuntu
 
 # Builds an image
 build-img FOLDER TAG ARCH:
@@ -122,3 +122,32 @@ debian-buster-slim-arm64:
 ### RockyLinux
 
 ### Ubuntu
+
+# Builds all ubuntu images
+ubuntu: ubuntu-latest ubuntu-focal
+
+ubuntu_folder := "./ubuntu"
+ubuntu_tag := tag + "ubuntu-"
+
+# Builds latest ubuntu images
+ubuntu-latest: ubuntu-latest-x64 ubuntu-latest-arm64
+
+ubuntu_latest := ubuntu_tag + "latest"
+
+ubuntu-latest-x64:
+    just b {{ubuntu_folder}} {{ubuntu_latest}} {{arch_x64}}
+
+ubuntu-latest-arm64:
+    just b {{ubuntu_folder}} {{ubuntu_latest}} {{arch_arm64}}
+
+# Builds focal ubuntu images
+ubuntu-focal: ubuntu-focal-x64 ubuntu-focal-arm64
+
+ubuntu_focal_folder := debian_folder / "focal"
+ubuntu_focal := debian_tag + "focal"
+
+ubuntu-focal-x64:
+    just b {{ubuntu_focal_folder}} {{ubuntu_focal}} {{arch_x64}}
+
+ubuntu-focal-arm64:
+    just b {{ubuntu_focal_folder}} {{ubuntu_focal}} {{arch_arm64}}

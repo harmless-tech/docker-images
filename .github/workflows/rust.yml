@@ -24,10 +24,24 @@ runs:
     strategy:
       matrix:
         include:
-          - context: ./alpine
-            tag: alpine-latest
-          - context: ./debian
-            tag: debian-latest
+          - tag: alpine-latest
+            context: ./alpine
+          - tag: alpine-3.15
+            context: ./alpine/3.15
+          - tag: alpine-3.14
+            context: ./alpine/3.14
+          - tag: debian-latest
+            context: ./debian
+          - tag: debian-bullseye-slim
+            context: ./debian/bullseye/slim
+          - tag: debian-buster
+            context: ./debian/buster
+          - tag: debian-buster-slim
+            context: ./debian/buster/slim
+          - tag: ubuntu-latest
+            context: ./ubuntu
+          - tag: ubuntu-focal
+            context: ./ubuntu/focal
     runs-on: ubuntu-latest
     steps:
       - name: Get Rust Version
@@ -51,4 +65,3 @@ runs:
           pull: true
           platforms: linux/amd64,linux/arm64
           tags: ${{ env.img }}${{ matrix.tag }},${{ env.img }}${{ env.rust_version }}-${{ matrix.tag }}
-
