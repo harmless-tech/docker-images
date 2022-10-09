@@ -19,6 +19,7 @@ jobs:
     strategy:
       matrix:
         arch: [ linux/amd64, linux/arm64 ]
+        tag: [ alpine-latest, alpine-3.15, alpine-3.14, debian-latest, debian-bullseye-slim, debian-buster, debian-buster-slim, ubuntu-latest, ubuntu-focal ]
         include:
           - tag: alpine-latest
             context: ./alpine
