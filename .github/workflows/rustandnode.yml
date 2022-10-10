@@ -10,11 +10,10 @@ on:
   schedule:
     - cron: '0 6 * * 6'
 
-parameters:
-  imgs: &imgs [ rust, node, rustnode ]
-  archs: &archs [ amd64, arm64 ]
-  distros: &distros [ debian-latest, debian-bullseye-slim, debian-buster, debian-buster-slim, ubuntu-latest, ubuntu-focal ] # alpine-latest, alpine-3.15, alpine-3.14,
-  node_versions: &node_versions [ node, --lts ]
+# imgs: &imgs [ rust, node, rustnode ]
+# archs: &archs [ amd64, arm64 ]
+# distros: &distros [ debian-latest, debian-bullseye-slim, debian-buster, debian-buster-slim, ubuntu-latest, ubuntu-focal ] # alpine-latest, alpine-3.15, alpine-3.14,
+# node_versions: &node_versions [ node, --lts ]
 
 jobs:
   check:
@@ -26,8 +25,8 @@ jobs:
   rust:
     strategy:
       matrix:
-        arch: *archs
-        distro: *distros
+        arch: [ amd64, arm64 ]
+        distro: [ debian-latest, debian-bullseye-slim, debian-buster, debian-buster-slim, ubuntu-latest, ubuntu-focal ]
     outputs:
       rustc-version: ${{ steps.rustc.outputs.version }}
     runs-on: ubuntu-latest
@@ -44,32 +43,32 @@ jobs:
           echo "::set-output name=version::$(rustc -vV | grep '^release: ' | cut -c 10-)"
       - name: Generate Dockerfile and Tags
         run: echo tags=$(./gen.py -i rust -a ${{ matrix.arch }} -o ${{ matrix.distro }})
-      # - name: Docker Setup QEMU
-      #   uses: docker/setup-qemu-action@v2
-      # - name: Docker Setup Buildx
-      #   uses: docker/setup-buildx-action@v2
-      # - name: Docker Login
-      #   uses: docker/login-action@v2
-      #   if: ${{ github.event_name != 'pull_request' }}
-      #   with:
-      #     username: ${{ secrets.DOCKERHUB_USERNAME }}
-      #     password: ${{ secrets.DOCKERHUB_TOKEN }}
-      # - name: Build and push Docker images
-      #   uses: docker/build-push-action@v3
-      #   with:
-      #     context: .
-      #     push: ${{ github.event_name != 'pull_request' }}
-      #     no-cache: true
-      #     pull: true
-      #     platforms: linux/${{ matrix.arch }}
-      #     tags: ${{ env.tags }}
+      - name: Docker Setup QEMU
+        uses: docker/setup-qemu-action@v2
+      - name: Docker Setup Buildx
+        uses: docker/setup-buildx-action@v2
+      - name: Docker Login
+        uses: docker/login-action@v2
+        if: ${{ github.event_name != 'pull_request' }}
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+      - name: Build and push Docker images
+        uses: docker/build-push-action@v3
+        with:
+          context: .
+          push: ${{ github.event_name != 'pull_request' }}
+          no-cache: true
+          pull: true
+          platforms: linux/${{ matrix.arch }}
+          tags: ${{ env.tags }}
 
   node:
     strategy:
       matrix:
-        arch: *archs
-        distro: *distros
-        version: *node_versions
+        arch: [ amd64, arm64 ]
+        distro: [ debian-latest, debian-bullseye-slim, debian-buster, debian-buster-slim, ubuntu-latest, ubuntu-focal ]
+        version: [ node, --lts ]
     outputs:
       node-version: ${{ steps.node.outputs.version }}
     runs-on: ubuntu-latest
@@ -113,9 +112,9 @@ jobs:
     needs: [ rust, node ]
     strategy:
       matrix:
-        arch: *archs
-        distro: *distros
-        version: *node_versions
+        arch: [ amd64, arm64 ]
+        distro: [ debian-latest, debian-bullseye-slim, debian-buster, debian-buster-slim, ubuntu-latest, ubuntu-focal ]
+        version: [ node, --lts ]
     env:
       RUSTC_VERSION: ${{ needs.rust.outputs.rustc-version }}
       NODE_VERSION: ${{ needs.node.outputs.node-version }}
