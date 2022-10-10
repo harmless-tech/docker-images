@@ -1,0 +1,144 @@
+name: Build Rust, Node, and RustNode Images
+
+on:
+  push:
+    branches: [ main ]
+    paths: [ templates/**, .github/workflows/** ]
+  pull_request:
+    branches: [ main ]
+  workflow_dispatch:
+  schedule:
+    - cron: '0 6 * * 6'
+
+parameters:
+  imgs: &imgs [ rust, node, rustnode ]
+  archs: &archs [ amd64, arm64 ]
+  distros: &distros [ debian-latest, debian-bullseye-slim, debian-buster, debian-buster-slim, ubuntu-latest, ubuntu-focal ] # alpine-latest, alpine-3.15, alpine-3.14,
+  node_versions: &node_versions [ node, --lts ]
+
+jobs:
+  rust:
+    strategy:
+      matrix:
+        arch: *archs
+        distro: *distros
+    outputs:
+      rustc-version: ${{ steps.rustc.outputs.version }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Set Swap Space
+        uses: pierotofy/set-swap-space@v1.0
+        with:
+          swap-size-gb: 10
+      - uses: actions/checkout@v3
+      - name: Update rustc and get version
+        id: rustc
+        run: |
+          rustup update
+          echo "::set-output name=version::$(rustc -vV | grep '^release: ' | cut -c 10-)"
+      - name: Generate Dockerfile and Tags
+        run: echo tags=$(./gen.py -i rust -a ${{ matrix.arch }} -o ${{ matrix.distro }})
+      # - name: Docker Setup QEMU
+      #   uses: docker/setup-qemu-action@v2
+      # - name: Docker Setup Buildx
+      #   uses: docker/setup-buildx-action@v2
+      # - name: Docker Login
+      #   uses: docker/login-action@v2
+      #   if: ${{ github.event_name != 'pull_request' }}
+      #   with:
+      #     username: ${{ secrets.DOCKERHUB_USERNAME }}
+      #     password: ${{ secrets.DOCKERHUB_TOKEN }}
+      # - name: Build and push Docker images
+      #   uses: docker/build-push-action@v3
+      #   with:
+      #     context: .
+      #     push: ${{ github.event_name != 'pull_request' }}
+      #     no-cache: true
+      #     pull: true
+      #     platforms: linux/${{ matrix.arch }}
+      #     tags: ${{ env.tags }}
+
+  node:
+    strategy:
+      matrix:
+        arch: *archs
+        distro: *distros
+        version: *node_versions
+    outputs:
+      node-version: ${{ steps.node.outputs.version }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Set Swap Space
+        uses: pierotofy/set-swap-space@v1.0
+        with:
+          swap-size-gb: 10
+      - uses: actions/checkout@v3
+      - name: Update node
+        uses: dcodeIO/setup-node-nvm@v4
+        with:
+          node-version: ${{ matrix.version }}
+      - name: Get node version
+        id: node
+        run: |
+          echo "::set-output name=version::$(node --version | grep '^v' | cut -c 2-)"
+      - name: Generate Dockerfile and Tags
+        run: echo tags=$(./gen.py -i node -a ${{ matrix.arch }} -o ${{ matrix.distro }} -l ${{ matrix.version == '--lts' }})
+      - name: Docker Setup QEMU
+        uses: docker/setup-qemu-action@v2
+      - name: Docker Setup Buildx
+        uses: docker/setup-buildx-action@v2
+      - name: Docker Login
+        uses: docker/login-action@v2
+        if: ${{ github.event_name != 'pull_request' }}
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+      - name: Build and push Docker images
+        uses: docker/build-push-action@v3
+        with:
+          context: .
+          push: ${{ github.event_name != 'pull_request' }}
+          no-cache: true
+          pull: true
+          platforms: linux/${{ matrix.arch }}
+          tags: ${{ env.tags }}
+
+  rustnode:
+    needs: [ rust, node ]
+    strategy:
+      matrix:
+        arch: *archs
+        distro: *distros
+        version: *node_versions
+    env:
+      RUSTC_VERSION: ${{ needs.rust.outputs.rustc-version }}
+      NODE_VERSION: ${{ needs.node.outputs.node-version }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Set Swap Space
+        uses: pierotofy/set-swap-space@v1.0
+        with:
+          swap-size-gb: 10
+      - uses: actions/checkout@v3
+      - name: tbjdfkfkjsbndbfjksbdfkjdfdfjkdfvjfdkkjdfkjbdfkbjdfkjbdbfkkjbdfkjbdfkjbdfkjbbfjkdfjbkfdjdfkkjbdfkbfdbkkdf
+      - name: Generate Dockerfile and Tags
+        run: echo tags=$(./gen.py -i rustnode -a ${{ matrix.arch }} -o ${{ matrix.distro }} -l ${{ matrix.version == '--lts' }})
+      - name: Docker Setup QEMU
+        uses: docker/setup-qemu-action@v2
+      - name: Docker Setup Buildx
+        uses: docker/setup-buildx-action@v2
+      - name: Docker Login
+        uses: docker/login-action@v2
+        if: ${{ github.event_name != 'pull_request' }}
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+      - name: Build and push Docker images
+        uses: docker/build-push-action@v3
+        with:
+          context: .
+          push: ${{ github.event_name != 'pull_request' }}
+          no-cache: true
+          pull: true
+          platforms: linux/${{ matrix.arch }}
+          tags: ${{ env.tags }}

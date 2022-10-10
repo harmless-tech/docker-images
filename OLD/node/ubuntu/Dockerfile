@@ -1,7 +1,6 @@
 #TAG: ubuntu-latest
 ARG SOURCE=ubuntu:latest
 FROM ${SOURCE}
-ARG VERSION=latest
 
 # Image updates
 RUN apt update
@@ -17,13 +16,9 @@ ENV PATH=/usr/local/nvm:$PATH
 # Node and Yarn Setup
 RUN mkdir -p /usr/local/nvm
 RUN curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.1/install.sh | bash
-RUN [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"; \
-    case $VERSION in \
-    lts) nvm install --lts;; \
-    latest) nvm install node;; \
-    *) echo "Version unknown!"; exit 1;; \
-    esac
 RUN echo '[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"' >> /etc/profile
+RUN [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"; \
+    nvm install %%NODE_VERSION%%
 RUN [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"; \
     npm install --global npm@latest; \
     npm install --global yarn; \
