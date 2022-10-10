@@ -10,7 +10,7 @@ RUN apt install -y pkg-config
 RUN apt install -y git curl build-essential libssl-dev
 
 # Build Cargo Bins
-RUN cargo install cargo-edit cargo-generate wasm-pack trunk bacon just
+RUN cargo install wasm-pack trunk bacon just
 
 FROM %%OS%%:%%OS_VERSION%%
 

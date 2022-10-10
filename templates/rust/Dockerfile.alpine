@@ -8,7 +8,7 @@ RUN apk upgrade
 RUN apk add git build-base openssl-dev pkgconf perl ca-certificates curl
 
 # Build Cargo Bins
-RUN %%CFLAGS%% cargo install cargo-edit cargo-generate wasm-pack trunk bacon just
+RUN %%CFLAGS%% cargo install wasm-pack trunk bacon just
 
 FROM alpine:%%OS_VERSION%%
 

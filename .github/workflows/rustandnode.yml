@@ -17,6 +17,12 @@ parameters:
   node_versions: &node_versions [ node, --lts ]
 
 jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Pull?
+        run: echo ${{ github.event_name != 'pull_request' }}
+
   rust:
     strategy:
       matrix:
@@ -120,7 +126,6 @@ jobs:
         with:
           swap-size-gb: 10
       - uses: actions/checkout@v3
-      - name: tbjdfkfkjsbndbfjksbdfkjdfdfjkdfvjfdkkjdfkjbdfkbjdfkjbdbfkkjbdfkjbdfkjbdfkjbbfjkdfjbkfdjdfkkjbdfkbfdbkkdf
       - name: Generate Dockerfile and Tags
         run: echo tags=$(./gen.py -i rustnode -a ${{ matrix.arch }} -o ${{ matrix.distro }} -l ${{ matrix.version == '--lts' }})
       - name: Docker Setup QEMU
