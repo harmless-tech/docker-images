@@ -7,7 +7,7 @@ RUN apt update
 RUN apt upgrade -y
 RUN DEBIAN_FRONTEND=noninteractive apt install -y --no-install-recommends tzdata
 RUN apt install -y pkg-config
-RUN apt install -y git curl build-essential libssl-dev
+RUN apt install -y git curl build-essential libssl-dev libdbus-1-dev
 
 # Build Cargo Bins
 RUN cargo install wasm-pack trunk bacon just

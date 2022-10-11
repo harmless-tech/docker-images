@@ -16,12 +16,6 @@ on:
 # node_versions: &node_versions [ node, --lts ]
 
 jobs:
-  check:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Pull?
-        run: echo ${{ github.event_name != 'pull_request' }}
-
   rust:
     strategy:
       matrix:

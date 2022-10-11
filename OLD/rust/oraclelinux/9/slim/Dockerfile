@@ -1,1 +1,0 @@
-#TAG: oraclelinux-9-slim

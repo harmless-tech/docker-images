@@ -5,7 +5,7 @@ FROM rust:alpine as builder
 # Image updates
 RUN apk update
 RUN apk upgrade
-RUN apk add git build-base openssl-dev pkgconf perl ca-certificates curl
+RUN apk add git build-base openssl-dev pkgconf perl ca-certificates curl dbus-dev
 
 # Build Cargo Bins
 RUN %%CFLAGS%% cargo install wasm-pack trunk bacon just
