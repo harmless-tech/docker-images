@@ -1,1 +1,0 @@
-#TAG: rockylinux-8-minimal

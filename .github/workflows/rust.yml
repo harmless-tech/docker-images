@@ -1,44 +1,55 @@
-name: Build Rust Images
+name: harmlesstech/rust
 
 on:
   push:
     branches: [ main ]
-    paths: [ rust/** ]
+    paths: [ .github/workflows/rust.yml, rust/** ]
   pull_request:
     branches: [ main ]
   workflow_dispatch:
   schedule:
-    - cron: '0 4 * * 6'
+    - cron: '0 2 * * 0'
 
 env:
-  wrk_dir: './rust/'
-  img: 'harmlesstech/rust:'
+  img: harmlesstech/rust
+
+defaults:
+  run:
+    working-directory: ./rust
 
 jobs:
+  check:
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.check.outputs.version }}
+      build: ${{ steps.check.outputs.build }}
+    steps:
+      - uses: actions/checkout@v3
+      - name: Update rust
+        run: rustup update
+      - uses: ahmadnassri/action-workflow-queue@v1
+        with:
+          timeout: 10800000
+      - uses: actions/cache@v3
+        if: ${{ github.event_name != 'pull_request' }}
+        with:
+          path: |
+            vstore.cache
+          key: docker-${{ env.img }}-${{ secrets.CACHE_VERSION }}
+      - name: Check and Configure
+        id: check
+        run: |
+          ../check.py $(rustc -vV | grep '^release: ' | cut -c 10-)
+
   build:
+    needs: [ check ]
+    if: ${{ check.outputs.build == 'true' }}
+    env:
+      VERSION: ${{ needs.check.outputs.version }}
     strategy:
       matrix:
-        arch: [ linux/amd64, linux/arm64 ]
-        tag: [ alpine-latest, alpine-3.15, alpine-3.14, debian-latest, debian-bullseye-slim, debian-buster, debian-buster-slim, ubuntu-latest, ubuntu-focal ]
-        include:
-          - tag: alpine-latest
-            context: ./alpine
-          - tag: alpine-3.15
-            context: ./alpine/3.15
-          - tag: alpine-3.14
-            context: ./alpine/3.14
-          - tag: debian-latest
-            context: ./debian
-          - tag: debian-bullseye-slim
-            context: ./debian/bullseye/slim
-          - tag: debian-buster
-            context: ./debian/buster
-          - tag: debian-buster-slim
-            context: ./debian/buster/slim
-          - tag: ubuntu-latest
-            context: ./ubuntu
-          - tag: ubuntu-focal
-            context: ./ubuntu/focal
+        arch: [ amd64, arm64, riscv64, ppc64le, s390x, 386, mips64le, mips64, arm/v7 ]
+        distro: [ debian:latest:bullseye, debian:buster, alpine:latest:3.16, alpine:3.15, alpine:3.14 ]
     runs-on: ubuntu-latest
     steps:
       - name: Set Swap Space
@@ -46,9 +57,8 @@ jobs:
         with:
           swap-size-gb: 10
       - uses: actions/checkout@v3
-      - name: Get Rust Version
-        run: |
-          echo "rust_version=$(rustc -vV | grep '^release: ' | cut -c 10-)" >> $GITHUB_ENV
+      - name: Generate Dockerfile and Tags
+        run: echo tags=$(./gen.py ${{ matrix.arch }} ${{ matrix.distro }} ${{ env.img }}) ${{ env.VERSION }}
       - name: Docker Setup QEMU
         uses: docker/setup-qemu-action@v2
       - name: Docker Setup Buildx
@@ -60,11 +70,12 @@ jobs:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
       - name: Build and push Docker images
+        if: ${{ env.tags != 'None' }}
         uses: docker/build-push-action@v3
         with:
-          context: ${{ env.wrk_dir }}${{ matrix.context }}
+          context: .
           push: ${{ github.event_name != 'pull_request' }}
           no-cache: true
           pull: true
-          platforms: ${{ matrix.arch }}
-          tags: ${{ env.img }}${{ matrix.tag }},${{ env.img }}${{ env.rust_version }}-${{ matrix.tag }}
+          platforms: linux/${{ matrix.arch }}
+          tags: ${{ env.tags }}
