@@ -10,15 +10,15 @@ rust_targets = {
         "riscv64": None,
         "ppc64le": None,
         "s390x": None,
-        "386": "i686-unknown-linux-musl",
-        "mips64le": "mips64el-unknown-linux-muslabi64",
-        "mips64": "mips64-unknown-linux-muslabi64",
-        "arm/v7": "armv7-unknown-linux-musleabihf"
+        "386": None,
+        "mips64le": None,
+        "mips64": None,
+        "arm/v7": None
     },
     "debian": {
         "amd64": "x86_64-unknown-linux-gnu",
         "arm64": "aarch64-unknown-linux-gnu",
-        "riscv64": "riscv64gc-unknown-linux-gnu",
+        "riscv64": None,
         "ppc64le": "powerpc64le-unknown-linux-gnu",
         "s390x": "s390x-unknown-linux-gnu",
         "386": "i686-unknown-linux-gnu",
